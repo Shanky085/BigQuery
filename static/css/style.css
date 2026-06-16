@@ -1193,3 +1193,117 @@ body {
         width: 100%;
     }
 }
+
+/* ==========================================================================
+   LIGHT THEME OVERRIDES
+   ========================================================================== */
+
+body[data-theme="light"] {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-surface: rgba(255, 255, 255, 0.7);
+    
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-border-hover: rgba(0, 0, 0, 0.16);
+    --glass-shadow: rgba(15, 23, 42, 0.06);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    
+    --primary: #4f46e5;
+    --primary-hover: #3730a3;
+    --primary-glow: rgba(79, 70, 229, 0.15);
+    
+    --accent-cyan: #0ea5e9;
+    --accent-cyan-glow: rgba(14, 165, 233, 0.15);
+    
+    --color-feature-bg: rgba(16, 185, 129, 0.1);
+    --color-feature-border: rgba(16, 185, 129, 0.4);
+    
+    --color-change-bg: rgba(245, 158, 11, 0.1);
+    --color-change-border: rgba(245, 158, 11, 0.4);
+    
+    --color-breaking-bg: rgba(239, 68, 68, 0.1);
+    --color-breaking-border: rgba(239, 68, 68, 0.4);
+    
+    --color-announcement-bg: rgba(59, 130, 246, 0.1);
+    --color-announcement-border: rgba(59, 130, 246, 0.4);
+    
+    --color-issue-bg: rgba(236, 72, 153, 0.1);
+    --color-issue-border: rgba(236, 72, 153, 0.4);
+}
+
+/* Light mode specific element adjustments */
+body[data-theme="light"] .card-body code {
+    background: rgba(0, 0, 0, 0.05);
+    color: #c2185b; /* Dark pink for readability in light mode */
+}
+
+body[data-theme="light"] .bg-glow {
+    opacity: 0.06;
+}
+
+body[data-theme="light"] .modal-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+}
+
+body[data-theme="light"] .modal-header,
+body[data-theme="light"] .tweet-box-container {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="light"] .tweet-display-name {
+    color: #0f172a !important;
+}
+
+body[data-theme="light"] .tweet-content-area textarea {
+    color: #0f172a;
+}
+
+body[data-theme="light"] .tweet-content-area textarea::placeholder {
+    color: #94a3b8;
+}
+
+body[data-theme="light"] .tweet-preview-card {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body[data-theme="light"] .modal-footer {
+    background: #f1f5f9;
+    border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+body[data-theme="light"] .x-logo {
+    color: #000;
+}
+
+body[data-theme="light"] .toast {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #0f172a;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="light"] .toast-close:hover {
+    color: #0f172a;
+}
+
+/* Sun/Moon Toggle Visibilities */
+body[data-theme="light"] .icon-sun {
+    display: block !important;
+}
+body[data-theme="light"] .icon-moon {
+    display: none !important;
+}
+body:not([data-theme="light"]) .icon-sun {
+    display: none !important;
+}
+body:not([data-theme="light"]) .icon-moon {
+    display: block !important;
+}
+

@@ -7,6 +7,7 @@ let currentSortOrder = 'newest';
 
 // DOM Elements
 const refreshBtn = document.getElementById('refresh-btn');
+const themeToggleBtn = document.getElementById('theme-toggle');
 const exportBtn = document.getElementById('export-btn');
 const searchInput = document.getElementById('search-input');
 const sortSelect = document.getElementById('sort-select');
@@ -54,6 +55,7 @@ const toastContainer = document.getElementById('toast-container');
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     fetchReleaseNotes(false);
     setupEventListeners();
 });
@@ -63,6 +65,11 @@ function setupEventListeners() {
     refreshBtn.addEventListener('click', () => {
         fetchReleaseNotes(true);
     });
+
+    // Theme toggle button
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', toggleTheme);
+    }
 
     // Export CSV button
     if (exportBtn) {
@@ -610,4 +617,21 @@ function exportToCSV() {
     document.body.removeChild(link);
     
     showToast('Exported', `Successfully exported ${filteredUpdates.length} updates to CSV.`, 'success');
+}
+
+/* ==========================================================================
+   THEME TOGGLE UTILITY
+   ========================================================================== */
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.body.setAttribute('data-theme', savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    showToast('Theme Changed', `Swapped to ${newTheme} mode.`, 'info');
 }
