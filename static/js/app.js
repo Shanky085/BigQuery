@@ -7,6 +7,7 @@ let currentSortOrder = 'newest';
 
 // DOM Elements
 const refreshBtn = document.getElementById('refresh-btn');
+const exportBtn = document.getElementById('export-btn');
 const searchInput = document.getElementById('search-input');
 const sortSelect = document.getElementById('sort-select');
 const typeFilters = document.getElementById('type-filters');
@@ -62,6 +63,11 @@ function setupEventListeners() {
     refreshBtn.addEventListener('click', () => {
         fetchReleaseNotes(true);
     });
+
+    // Export CSV button
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportToCSV);
+    }
 
     // Retry button on error screen
     retryBtn.addEventListener('click', () => {
@@ -339,7 +345,7 @@ function renderGrid(updates) {
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
-                        Copy Text
+                        Copy to Clipboard
                     </button>
                 </div>
                 <a href="${up.link}" target="_blank" rel="noopener" class="btn-card-action" title="View official release notes source page">
@@ -551,4 +557,57 @@ function escapeHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+/* ==========================================================================
+   EXPORT TO CSV UTILITY
+   ========================================================================== */
+
+function exportToCSV() {
+    if (filteredUpdates.length === 0) {
+        showToast('No Data', 'There are no release notes to export.', 'error');
+        return;
+    }
+    
+    // CSV headers
+    const headers = ['Date', 'Type', 'Content (Text)', 'Link', 'ID'];
+    
+    // Escaping rule for CSV double quotes and special characters
+    const escapeCSVField = (val) => {
+        if (val === null || val === undefined) return '';
+        let text = String(val).replace(/"/g, '""');
+        if (text.includes(',') || text.includes('\n') || text.includes('"') || text.includes('\r')) {
+            text = `"${text}"`;
+        }
+        return text;
+    };
+    
+    const rows = filteredUpdates.map(up => [
+        up.date,
+        up.type,
+        up.content_text,
+        up.link,
+        up.id
+    ]);
+    
+    const csvContent = [
+        headers.map(escapeCSVField).join(','),
+        ...rows.map(row => row.map(escapeCSVField).join(','))
+    ].join('\r\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    // File name uses type filter and current ISO date
+    const category = currentFilterType.toLowerCase();
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${category}_${dateStr}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast('Exported', `Successfully exported ${filteredUpdates.length} updates to CSV.`, 'success');
 }
