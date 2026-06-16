@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A premium, state-of-the-art developer dashboard to view, filter, search, and tweet BigQuery release notes. Stay updated with Google Cloud's latest features.">
+    <title>BigQuery Release Pulse</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Background Decor Elements -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>BigQuery <span>Release Pulse</span></h1>
+                    <p class="subtitle">Real-time Cloud Updates Feed</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="fetch-status">
+                    <span class="status-indicator animate-pulse"></span>
+                    <span id="last-fetched-text">Checking status...</span>
+                </div>
+                <button id="refresh-btn" class="btn btn-primary btn-refresh" aria-label="Refresh Feed">
+                    <span class="btn-icon">
+                        <svg class="icon-refresh" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.56-.56" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="btn-text">Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD METRICS SUMMARY -->
+        <section class="metrics-grid">
+            <div class="metric-card" id="metric-all" data-filter="All">
+                <div class="metric-value" id="count-all">-</div>
+                <div class="metric-label">Total Updates</div>
+                <div class="metric-bar metric-bar-all"></div>
+            </div>
+            <div class="metric-card" id="metric-features" data-filter="Feature">
+                <div class="metric-value" id="count-features">-</div>
+                <div class="metric-label">Features Added</div>
+                <div class="metric-bar metric-bar-features"></div>
+            </div>
+            <div class="metric-card" id="metric-changes" data-filter="Change">
+                <div class="metric-value" id="count-changes">-</div>
+                <div class="metric-label">Changes</div>
+                <div class="metric-bar metric-bar-changes"></div>
+            </div>
+            <div class="metric-card" id="metric-breaking" data-filter="Breaking">
+                <div class="metric-value" id="count-breaking">-</div>
+                <div class="metric-label">Breaking / Deprecated</div>
+                <div class="metric-bar metric-bar-breaking"></div>
+            </div>
+            <div class="metric-card" id="metric-issues" data-filter="Issue">
+                <div class="metric-value" id="count-issues">-</div>
+                <div class="metric-label">Issues / Fixed</div>
+                <div class="metric-bar metric-bar-issues"></div>
+            </div>
+        </section>
+
+        <!-- CONTROLS (SEARCH & FILTERS) -->
+        <section class="controls-card">
+            <div class="search-box">
+                <span class="search-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </span>
+                <input type="text" id="search-input" placeholder="Search update content, features, SDKs, syntax..." aria-label="Search release notes">
+            </div>
+
+            <div class="filter-controls">
+                <div class="filter-buttons-scroll">
+                    <div class="filter-group" id="type-filters">
+                        <button class="filter-btn active" data-type="All">All</button>
+                        <button class="filter-btn" data-type="Feature">Features</button>
+                        <button class="filter-btn" data-type="Change">Changes</button>
+                        <button class="filter-btn" data-type="Breaking">Breaking</button>
+                        <button class="filter-btn" data-type="Announcement">Announcements</button>
+                        <button class="filter-btn" data-type="Issue">Issues</button>
+                    </div>
+                </div>
+
+                <div class="sort-group">
+                    <label for="sort-select">Sort By:</label>
+                    <select id="sort-select" class="sort-dropdown">
+                        <option value="newest" selected>Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAIN CONTENT (FEED GRID) -->
+        <main class="feed-section">
+            <!-- Loading State -->
+            <div id="loading-state" class="loading-state">
+                <div class="spinner-pulse"></div>
+                <p>Retrieving BigQuery Release notes...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="error-state hidden">
+                <div class="error-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3>Failed to load release notes</h3>
+                <p id="error-message">Could not communicate with the backend server.</p>
+                <button id="retry-btn" class="btn btn-secondary">Try Again</button>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state hidden">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                </div>
+                <h3>No updates match your filters</h3>
+                <p>Try clearing your search query or choosing a different type category.</p>
+                <button id="clear-filters-btn" class="btn btn-secondary">Clear Filters & Search</button>
+            </div>
+
+            <!-- Feed Grid -->
+            <div id="updates-grid" class="updates-grid hidden">
+                <!-- Javascript will render cards here -->
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="app-footer">
+            <p>BigQuery Release Pulse &copy; 2026. Data fetched from the official Google Cloud BigQuery RSS feed.</p>
+            <p class="footer-links">
+                <a href="https://docs.cloud.google.com/feeds/bigquery-release-notes.xml" target="_blank" rel="noopener">XML Feed</a>
+                &bull; 
+                <a href="https://cloud.google.com/bigquery/docs/release-notes" target="_blank" rel="noopener">Official Documentation</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- TWEET COMPOSER MODAL -->
+    <div id="tweet-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <span class="x-logo">
+                        <!-- Twitter/X SVG logo -->
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </span>
+                    <h3>Compose Tweet</h3>
+                </div>
+                <button id="close-modal-btn" class="modal-close-btn" aria-label="Close modal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <p class="modal-instruction">Customize your tweet text below. The link to the release notes is automatically appended.</p>
+                
+                <div class="tweet-box-container">
+                    <div class="tweet-avatar">BQ</div>
+                    <div class="tweet-content-area">
+                        <div class="tweet-user-info">
+                            <span class="tweet-display-name">Cloud Explorer</span>
+                            <span class="tweet-handle">@clouddev</span>
+                        </div>
+                        <textarea id="tweet-textarea" rows="5" maxlength="350" placeholder="What's happening?"></textarea>
+                    </div>
+                </div>
+
+                <div class="tweet-preview-card">
+                    <div class="preview-badge" id="preview-badge-type">FEATURE</div>
+                    <div class="preview-date" id="preview-badge-date">June 15, 2026</div>
+                    <div class="preview-text" id="preview-badge-text">Select card details will display here...</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="character-count-container">
+                    <span id="char-count">0</span> / 280 characters
+                </div>
+                <div class="modal-actions">
+                    <button id="cancel-tweet-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="post-tweet-btn" class="btn btn-primary btn-tweet">
+                        <span>Post to X</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- JavaScript code -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
